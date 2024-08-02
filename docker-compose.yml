@@ -1,0 +1,54 @@
+networks:
+  mynetwork:
+    driver: bridge
+
+services:
+  db:
+    container_name: "database"
+    build:
+      context: ./database/docker
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - ./env/database.env
+    volumes:
+      - ./database/sql:/sql
+      - ./database/db_data/var/pgdata:/var/lib/postgresql/data
+    ports:
+      - "6100:5432"
+    networks:
+      - mynetwork
+
+  be-nodejs:
+    container_name: "be-nodejs"
+    build:
+      context: ./backend/nodejs
+      dockerfile: Dockerfile
+    env_file:
+      - ./env/be_nodejs.env
+    restart: always
+    volumes:
+      - ./backend/nodejs:/app
+      - /app/node_modules
+    hostname: be_nodejs
+    ports:
+      - "5001:80"
+    networks:
+      - mynetwork
+
+  # be-golang:
+  #   container_name: "be-golang"
+  #   build:
+  #     context: ./backend/golang
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - ./env/be_golang.env
+  #   restart: always
+  #   volumes:
+  #     - ./backend/golang:/app
+  #     - /app/node_modules
+  #   hostname: be_golang
+  #   ports:
+  #     - "5001:80"
+  #   networks:
+  #     - mynetwork
